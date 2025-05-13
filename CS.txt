@@ -1,0 +1,261 @@
+
+Assignment 1
+
+
+nmap --version
+ipconfig
+
+nmap <target>              	Basic scan of 1000 common ports
+nmap -p 80,443 <target>   	Scan specific ports
+nmap -p- <target>	          Scan all 65535 TCP ports
+
+ OS Detection
+Command	Description
+nmap -O <target>	Try to detect the OS of the target
+nmap -A <target>	Aggressive scan: OS, version, script, and traceroute
+
+ Service & Version Detection
+Command	Description
+nmap -sV <target>	Detect service versions on open ports
+nmap -sV -p 22,80 <target>	Version detection on specific ports
+
+
+nmap -sn 192.168.1.0/24   
+-sn: Ping scan (also called host discovery). It disables port scanning and only checks which hosts are up.
+192.168.1.0/24: Scans the entire subnet from 192.168.1.1 to 192.168.1.254 (assuming .0 is the network address and .255 is the broadcast address).
+
+nmap -p 22,80,443 192.168.1.10
+This Nmap command tells it to scan specific ports on the host 192.168.1.10.
+
+-p 22,80,443: Scan only port 22 (SSH), port 80 (HTTP), and port 443 (HTTPS).
+
+192.168.1.10: The target IP address.
+
+Use Case:
+You're checking whether the common remote access and web service ports are open and responding on a specific host
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Assignment 3: RSA
+
+!pip install pycryptodome
+
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+import base64
+
+# Generate a new RSA key pair
+key = RSA.generate(2048)
+
+# Extract the private and public keys
+private_key = key
+public_key = key.publickey()
+
+def encrypt_message(message, pub_key):
+    """
+    Encrypts a message using the provided public key.
+    Returns the base64-encoded ciphertext.
+    """
+    cipher = PKCS1_OAEP.new(pub_key)
+    encrypted_message = cipher.encrypt(message.encode('utf-8'))
+    return base64.b64encode(encrypted_message).decode('utf-8')
+
+def decrypt_message(encrypted_message_b64, priv_key):
+    """
+    Decrypts a base64-encoded ciphertext using the provided private key.
+    Returns the original plaintext message.
+    """
+    encrypted_message = base64.b64decode(encrypted_message_b64)
+    cipher = PKCS1_OAEP.new(priv_key)
+    decrypted_message = cipher.decrypt(encrypted_message)
+    return decrypted_message.decode('utf-8')
+
+# Sample message to encrypt
+original_message = "Confidential message here."
+
+# Encrypt the message using the public key
+encrypted_msg = encrypt_message(original_message, public_key)
+print("Encrypted Message:", encrypted_msg)
+
+# Decrypt the message using the private key
+decrypted_msg = decrypt_message(encrypted_msg, private_key)
+print("Decrypted Message:", decrypted_msg)
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Assignment  4 : AES
+
+!pip install pycryptodome
+
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
+import base64
+
+def encrypt(plaintext, key):
+    """
+    Encrypts the plaintext using AES CBC mode with the provided key.
+    Returns the base64-encoded ciphertext including the IV.
+    """
+    iv = get_random_bytes(16)  # AES block size is 16 bytes
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    ciphertext = cipher.encrypt(pad(plaintext.encode('utf-8'), AES.block_size))
+    return base64.b64encode(iv + ciphertext).decode('utf-8')
+
+def decrypt(ciphertext_b64, key):
+    """
+    Decrypts the base64-encoded ciphertext using AES CBC mode with the provided key.
+    Returns the original plaintext.
+    """
+    ciphertext = base64.b64decode(ciphertext_b64)
+    iv = ciphertext[:16]
+    actual_ciphertext = ciphertext[16:]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext = unpad(cipher.decrypt(actual_ciphertext), AES.block_size)
+    return plaintext.decode('utf-8')
+
+# Example usage
+if __name__ == "__main__":
+    key = get_random_bytes(32)  # 256-bit key for AES-256
+    message = "Confidential message here."
+
+    encrypted = encrypt(message, key)
+    print("Encrypted:", encrypted)
+
+    decrypted = decrypt(encrypted, key)
+    print("Decrypted:", decrypted)
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Assignment 5: Play fair Cipher.
+
+
+def playfair_cipher(text, key, mode='encrypt'):
+    key = ''.join(sorted(set(key.upper().replace('J','I')), key=key.index))
+    matrix = [c for c in key if c.isalpha()]
+    for c in 'ABCDEFGHIKLMNOPQRSTUVWXYZ':
+        if c not in matrix:
+            matrix.append(c)
+    grid = [matrix[i:i+5] for i in range(0,25,5)]
+    def pos(c):
+        for r in range(5):
+            if c in grid[r]:
+                return r, grid[r].index(c)
+    text = ''.join(filter(str.isalpha, text.upper().replace('J','I')))
+    i = 0
+    pairs = []
+    while i < len(text):
+        a = text[i]
+        b = text[i+1] if i+1 < len(text) else 'X'
+        if a == b:
+            pairs.append((a, 'X'))
+            i += 1
+        else:
+            pairs.append((a, b))
+            i += 2
+    result = ''
+    for a, b in pairs:
+        r1, c1 = pos(a)
+        r2, c2 = pos(b)
+        if r1 == r2:
+            if mode == 'encrypt':
+                result += grid[r1][(c1+1)%5] + grid[r2][(c2+1)%5]
+            else:
+                result += grid[r1][(c1-1)%5] + grid[r2][(c2-1)%5]
+        elif c1 == c2:
+            if mode == 'encrypt':
+                result += grid[(r1+1)%5][c1] + grid[(r2+1)%5][c2]
+            else:
+                result += grid[(r1-1)%5][c1] + grid[(r2-1)%5][c2]
+        else:
+            result += grid[r1][c2] + grid[r2][c1]
+    return result
+
+key = "MONARCHY"
+message = "INSTRUMENTS"
+
+encrypted = playfair_cipher(message, key, mode='encrypt')
+print("Encrypted:", encrypted)
+
+decrypted = playfair_cipher(encrypted, key, mode='decrypt')
+print("Decrypted:", decrypted)
+
+
+
+Google dorkas
+
+
+intitle:
+Finds pages with specific words in the title.
+
+intitle:"index of /admin"
+Shows directory listings with "admin" in the title — could reveal admin panels or directories (only browse if publicly accessible).
+
+
+inurl:
+Finds pages with specific text in the URL.
+inurl:login
+Useful to find login pages. This helps in understanding which technologies or platforms are being used (e.g., WordPress, Joomla, etc.).
+
+
+site:
+Limits search results to a specific domain or site.
+site:example.com
+Returns all pages indexed by Google for a specific website.
+
+
+
+filetype:
+Searches for specific file types.
+filetype:pdf "confidential"
+Finds PDF files containing the word "confidential" — helpful for public research but should never be used to access private documents.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Download burpsuite community version:
+https://portswigger.net/burp/communitydownload
+
+Download burp suite certificate:
+http://burpsuite
+
+Demo application: 
+https://portswigger.net/web-security/logic-flaws/examples/lab-logic-flaws-excessive-trust-in-client-side-controls
+
+2 Times ^
+
+
+username/password for demo application:
+wiener / peter
+
+
+Password:- p39*g@tx^DN#3%N*wF86+zQfZ6C^N97W
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Nessus
+
+Web Application Scanner
+
+http://
+
+vulnweb.com
+
+
+
+
+
+
+
