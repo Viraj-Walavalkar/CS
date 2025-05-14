@@ -3,6 +3,32 @@ Assignment 1
 
 
 nmap --version
+IPv4 Address. . . . . . . . . . . : 192.168.1.6
+1. nmap 192.168.1.6          and also for other ip
+
+2. nmap -sn 192.168.1.6
+
+3. nmap 1.1.1.1
+
+4. nmap example.com
+
+5. nmap -p 1-65535 localhost         Scan specific ports or scan entire port ranges
+
+6. nmap -sp 192.168.5.0/24           Nmap Ping Scan
+
+7. nmap 8.8.8.0/28         Scan IP ranges
+
+8. nmap --top-ports 20 192.168.1.106             Scan the most popular ports
+
+9. nmap -iL list.txt        Scan hosts from a text file
+
+10. nmap -oN output.txt securitytrails.xyz          Save your Nmap scan results to a file
+
+11. nmap -p 80 -n 8.8.8.8        Disabling DNS name resolution
+
+12. Scan using TCP or UDP protocols
+	nmap -sT 192.168.1.1	(TCP)
+	nmap -sU localhost	(UDP)
 ipconfig
 
 nmap <target>              	Basic scan of 1000 common ports
@@ -188,10 +214,33 @@ print("Encrypted:", encrypted)
 decrypted = playfair_cipher(encrypted, key, mode='decrypt')
 print("Decrypted:", decrypted)
 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Google dorkas
 
+Google Dorking
+
+1. site:example.com
+
+2. intitle:login
+
+3. inurl:customer ,  inurl:admin
+
+4. filetype:docx confidential  ,  filetype:pdf
+
+5. allinurl:admin login 
+
+6. location:IND   ,   location:USA
+
+
+Shodan
+
+1. product:”MongoDB” port:27017
+
+2. product:"Hikvision IP Camera"  --> search Hikvision cameras
+
+
+--> https://sankalppatil12112001.medium.com/shodan-for-pentesting-the-ultimate-detailed-guide-part-2-fb95047a08d3
 
 intitle:
 Finds pages with specific words in the title.
@@ -226,6 +275,9 @@ Finds PDF files containing the word "confidential" — helpful for public resear
 Download burpsuite community version:
 https://portswigger.net/burp/communitydownload
 
+Address- http://localhost
+Port- 8080
+
 Download burp suite certificate:
 http://burpsuite
 
@@ -253,7 +305,10 @@ http://
 
 vulnweb.com
 
+viraj
+viraj@1234
 
+Activation Code: J3MX-UDDQ-EUYD-VAS4
 
 
 
